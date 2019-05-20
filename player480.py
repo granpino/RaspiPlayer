@@ -3,7 +3,7 @@
 # This is to be used with a 3.5" HDMI touchscreen or equivalent
 # Tested with the Raspberry pi 2 and raspbian stretch
 # The program must be run within the Lxterminal
-# 
+# Rev2.1 
 import sys, pygame
 from pygame.locals import *
 import time
@@ -105,6 +105,7 @@ def button(number):
 
 	if number == 1: # play / pause	
 		subprocess.call("mpc toggle ", shell=True)
+		album_img = ("/tmp/kunst.png")
 		refresh_menu_screen()
 
 	if number == 2:
@@ -125,7 +126,6 @@ def button(number):
 	if number == 5:
 		subprocess.call("mpc next ", shell=True)
 		global album_img
-		album_img = ("/tmp/kunst.png")
 		refresh_menu_screen()
 
 	if number == 6:
@@ -153,7 +153,6 @@ def button(number):
 
 def refresh_menu_screen():
 #set up the fixed items on the menu
-
 #screen.fill(black) #change the colours if needed
         current_time = datetime.datetime.now().strftime('%I:%M')
         time_font=pygame.font.Font(None,70)
@@ -162,21 +161,26 @@ def refresh_menu_screen():
 	font=pygame.font.Font(None,32)
 	station_font=pygame.font.Font(None,28)
         skin=pygame.image.load("skin480.png")
-	indicator_on=font.render("[        ]", 1, (white))
+	indicator_on=font.render("[        ]", 1, (blue))
         indicator_off=font.render("", 1, (white))
 	label2=font.render("RaspiPlayer", 1, (silver))
 
 	#draw the main elements on the screen ===============================
-	album_art=pygame.image.load(album_img)
-	album_art=pygame.transform.scale(album_art, (155, 117))
+#--	album_art=pygame.image.load(album_img) # album art
+#--	album_art=pygame.transform.scale(album_art, (155, 117))
         screen.blit(skin,(0,0))
-        screen.blit(album_art,(17,60))
+#--     screen.blit(album_art,(17,60))
         #screen.blit(label,(520, 105))
         screen.blit(label2,(190, 62))
 	pygame.draw.rect(screen, black, (336, 95, 130, 49),0)
 	pygame.draw.rect(screen, black, (52, 188, 407, 71),0)
         screen.blit(time_label,(336, 90))
-
+	try:
+	    album_art=pygame.image.load(album_img) # album art
+            album_art=pygame.transform.scale(album_art, (155, 117))
+	    screen.blit(album_art,(17,60))
+	except pygame.error:
+	    refresh_menu_screen()
 	##### display the station name and split it into 2 parts : 
 	lines = subprocess.check_output("mpc current", shell=True).split("-")
 	if len(lines)==1:
@@ -194,7 +198,7 @@ def refresh_menu_screen():
 	if line1 =="":
 		line2 = "Press PLAY"
 		station_status = "Stopped"
-		status_font = red
+		status_font = cyan
 	else:
 		station_status = " "
 		status_font = cyan
@@ -217,8 +221,8 @@ def refresh_menu_screen():
                 Ln2 = RemTime[1]
 
 #        Ln1 = Ln1[1:19]
-        Ln2 = Ln2[10:]
-        rem_time=station_font.render(Ln2, 1, (silver))
+        Ln2 = Ln2[:-5]
+        rem_time=station_font.render(Ln2, 1, (cyan))
         screen.blit(rem_time,(190,153))
 
 	######## add volume number
@@ -240,40 +244,34 @@ def refresh_menu_screen():
 	else:
 		screen.blit(indicator_off,(298, 16))
 		screen.blit(indicator_on,(209,16))
-
+	time.sleep(.5)
 	pygame.display.flip()
 
 
 def main():
-        
-        while 1:
-                for event in pygame.event.get():
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                                print "screen pressed" #for debugging purposes
-                                pos = (pygame.mouse.get_pos() [0], pygame.mouse.get_pos() [1])
-                                print pos #for checking
-                                pygame.draw.circle(screen, red, pos, 2, 0) #for debugging purposes - adds a small dot where the screen is pressed
-                                on_click()
 
-#ensure there is always a safe way to end the program if the touch screen fails
+    while 1:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                print "screen pressed" #for debugging purposes
+                pos = (pygame.mouse.get_pos() [0], pygame.mouse.get_pos() [1])
+                print pos #for checking
+                on_click()
 
-                        if event.type == KEYDOWN:
-                                if event.key == K_ESCAPE:
-                                        sys.exit()
+            #ensure there is always a safe way to end the 
+            #program if the touch screen fails
 
-		refresh_menu_screen()
-
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE: # ESC key will kill it
+                    sys.exit()
 	refresh_menu_screen()
-	time.sleep(0.2)
-
+    time.sleep(0.2)
 
 #################### EVERTHING HAS NOW BEEN DEFINED ###########################
-
 #set size of the screen
 size = width, height = 480, 320
 #screen = pygame.display.set_mode(size) #,pygame.FULLSCREEN)
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
-#station_name()
 refresh_menu_screen()  #refresh the menu interface 
 main() #check for key presses and start emergency exit
 
