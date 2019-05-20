@@ -207,8 +207,8 @@ def refresh_menu_screen():
 	additional_data=station_font.render(line2, 1, (white))
 	station_label=font.render(station_status, 1, (status_font))
 	screen.blit(station_label,(190,117)) #playing
-	screen.blit(station_name,(66,195))
-	screen.blit(additional_data,(66,231))
+	screen.blit(station_name,(66,231))
+	screen.blit(additional_data,(66,195))
 
 	 ##### display remaining time  : 
         RemTime = subprocess.check_output("mpc -f %time%", shell=True).split("\n")
