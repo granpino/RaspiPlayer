@@ -1,9 +1,9 @@
 #!/usr/bin/python
-# RaspiPlayer 
+# RaspiPlayer 480x320
 # This is to be used with a 3.5" HDMI touchscreen or equivalent
 # Tested with the Raspberry pi 2 and raspbian stretch
 # The program must be run within the Lxterminal
-# Rev2.1 
+# Rev2.2 
 import sys, pygame
 from pygame.locals import *
 import time
@@ -31,20 +31,21 @@ subprocess.call("mpc clear", shell=True)
 subprocess.call("mpc volume 65", shell=True)
 subprocess.call("mpc update ", shell=True)
 subprocess.call("mpc load playlist", shell=True)
-global mp3
+
+
 mp3 = False
 shuffle = False
 
-global album_img
+#global album_img
 _image = ('/tmp/kunst.png')
 album_img = ('150x112.png')
 
 
 #define function that checks for mouse location
 def on_click():
-	click_pos = (pygame.mouse.get_pos() [0], pygame.mouse.get_pos() [1])
+#	click_pos = (pygame.mouse.get_pos() [0], pygame.mouse.get_pos() [1])
 	#check to see if exit has been pressed
-	if 396 <= click_pos[0] <= 460 and 14 <= click_pos[1] <=49:
+	if 396 < click_pos[0] < 460 and 10 < click_pos[1] < 56:
 		print "You pressed exit" 
 		button(0)
 	#now check to see if play was pressed
@@ -56,7 +57,7 @@ def on_click():
 #                print "You pressed button stop"
 #                button(2)
 	#now check to see if mp3 was pressed
-        if 284 <= click_pos[0] <= 371 and 14 <= click_pos[1] <=49:
+        if 284 <= click_pos[0] <= 371 and 10 <= click_pos[1] <=56:
                 print "You pressed button mp3"
                 button(3)
 	#now check to see if previous  was pressed
@@ -70,17 +71,17 @@ def on_click():
                 button(5)
 
 	 #now check to see if volume down was pressed
-        if 17 <= click_pos[0] <= 103 and 14 <= click_pos[1] <=49:
+        if 13 <= click_pos[0] <= 103 and 10 <= click_pos[1] <= 56:
                 print "You pressed volume down"
                 button(6)
 
 	 #now check to see if button 7 was pressed
-        if 105 <= click_pos[0] <= 192 and 14 <= click_pos[1] <=49:
+        if 104 <= click_pos[0] <= 192 and 10 <= click_pos[1] <=56:
                 print "You pressed volume up"
                 button(7)
 
 	 #now check to see if button 8 was pressed
-        if 195 <= click_pos[0] <= 282 and 14 <= click_pos[1] <=49:
+        if 195 <= click_pos[0] <= 282 and 10 <= click_pos[1] <=56:
                 print "You pressed radio"
                 button(8)
 
@@ -92,6 +93,7 @@ def on_click():
 
 #define action on pressing buttons
 def button(number):
+	global album_img
 	print "You pressed button ",number
 	if number == 0:    #specific script when exiting
 		screen.fill(black)
@@ -100,7 +102,7 @@ def button(number):
         	label=font.render("RaspiPlayer Rocks!!", 1, (white))
         	screen.blit(label,(40,150))
 		pygame.display.flip()
-		time.sleep(3)
+		time.sleep(2)
 		sys.exit()
 
 	if number == 1: # play / pause	
@@ -125,7 +127,6 @@ def button(number):
 
 	if number == 5:
 		subprocess.call("mpc next ", shell=True)
-		global album_img
 		refresh_menu_screen()
 
 	if number == 6:
@@ -146,18 +147,20 @@ def button(number):
                 subprocess.call("mpc clear ", shell=True)
 		subprocess.call("mpc update ", shell=True)
 		subprocess.call("mpc add /", shell=True) 
-		global mp3
 		mp3 = True
                 refresh_menu_screen()
 
 
 def refresh_menu_screen():
 #set up the fixed items on the menu
-#screen.fill(black) #change the colours if needed
+	cpu = os.popen("vcgencmd measure_temp").readline()
+	cpu = cpu[-7:] #remove characters not needed
+	cpu = cpu[:-1]
         current_time = datetime.datetime.now().strftime('%I:%M')
         time_font=pygame.font.Font(None,70)
         time_label = time_font.render(current_time, 1, (silver))
-
+	cpu_font=pygame.font.Font(None,32) 
+	cpu_label = cpu_font.render(cpu, 1, (silver)) 
 	font=pygame.font.Font(None,32)
 	station_font=pygame.font.Font(None,28)
         skin=pygame.image.load("skin480.png")
@@ -165,12 +168,9 @@ def refresh_menu_screen():
         indicator_off=font.render("", 1, (white))
 	label2=font.render("RaspiPlayer", 1, (silver))
 
-	#draw the main elements on the screen ===============================
-#--	album_art=pygame.image.load(album_img) # album art
-#--	album_art=pygame.transform.scale(album_art, (155, 117))
+	#draw the main elements on the screen 
         screen.blit(skin,(0,0))
-#--     screen.blit(album_art,(17,60))
-        #screen.blit(label,(520, 105))
+        screen.blit(cpu_label,(398, 62)) #cputemp
         screen.blit(label2,(190, 62))
 	pygame.draw.rect(screen, black, (336, 95, 130, 49),0)
 	pygame.draw.rect(screen, black, (52, 188, 407, 71),0)
@@ -244,18 +244,18 @@ def refresh_menu_screen():
 	else:
 		screen.blit(indicator_off,(298, 16))
 		screen.blit(indicator_on,(209,16))
-	time.sleep(.5)
+	time.sleep(.3)
 	pygame.display.flip()
 
 
 def main():
-
+    global click_pos
     while 1:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
+                click_pos = pygame.mouse.get_pos()
                 print "screen pressed" #for debugging purposes
-                pos = (pygame.mouse.get_pos() [0], pygame.mouse.get_pos() [1])
-                print pos #for checking
+                print click_pos #for checking
                 on_click()
 
             #ensure there is always a safe way to end the 
