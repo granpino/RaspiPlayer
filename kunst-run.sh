@@ -13,5 +13,5 @@
 #kunst.sh
 
 
-sudo kunst &
+sudo kunst --music_dir /mnt/usbdrive/ &
 

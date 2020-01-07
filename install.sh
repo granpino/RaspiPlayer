@@ -4,7 +4,7 @@
 clear
 #create playlists
 echo "Before running this file, make sure mpd, mpc, Kunst"
-echo "and jq are installed"
+echo "ffmjpeg, and jq are installed"
 echo "====================="
 
 echo ""
@@ -21,7 +21,7 @@ echo "Generating Playlists:"
 echo "======================"
 echo ""
 sudo touch /var/lib/mpd/playlists/playlist.m3u
-sudo touch /var/lib/mpd/playlists/mp3.m3u
+#sudo touch /var/lib/mpd/playlists/mp3.m3u
 
 #sudo mv *.mp3 /mnt/usbdrive
 #sudo ls -1 /mnt/usbdrive/*.mp3 > /var/lib/mpd/playlists/mp3.m3u
@@ -30,25 +30,16 @@ sudo touch /var/lib/mpd/playlists/mp3.m3u
 
 cat <<EOF > /var/lib/mpd/playlists/playlist.m3u
 
+http://airspectrum.cdnstream1.com:8018/1606_192
+http://uk3.internet-radio.com:8198/
+http://wbez.ord.streamguys1.com/wbez128.mp3
 http://relay3.slayradio.org:8000/
-http://www.vpr.net/vpr_files/stream_playlists/vpr_bbc_mp3.pls
 http://bigrradio-edge1.cdnstream.com/5106_128
 http://s1.distortionradio.com/absolute-alternative-64
 http://c10icy.prod.playlists.ihrhls.com/4846_icy
 http://c5icy.prod.playlists.ihrhls.com/857_icy
 http://c5icy.prod.playlists.ihrhls.com/849_icy
-http://staff.timb-radio.com:8000/trance_192
-http://wbez.ord.streamguys1.com/wbez128.mp3
-http://playerservices.streamtheworld.com/pls/WUSNFMAAC.pls
-http://playerservices.streamtheworld.com/pls/WKQXFM.pls
-http://provisioning.streamtheworld.com/pls/WDRVFM.pls
 http://hyades.shoutca.st:8400/stream
-http://playerservices.streamtheworld.com/pls/WTMXFM.pls
-http://playerservices.streamtheworld.com/pls/WSHEFMAAC.pls
-http://provisioning.streamtheworld.com/pls/WLSFM.pls
-http://provisioning.streamtheworld.com/pls/WBBMFM.pls
-http://playerservices.streamtheworld.com/pls/WTMXFM.pls
-http://provisioning.streamtheworld.com/pls/WLUPFMAAC.pls
 
 EOF
 
@@ -88,7 +79,7 @@ sudo cp kunst-run.sh /etc/init.d/
 sudo chmod +x /etc/init.d/kunst-run.sh
 sudo update-rc.d kunst-run.sh defaults
 
-echo "Make backup of mpd.conf and create new:"
+echo "Create backup of mpd.conf:"
 echo "======================"
 echo ""
 sudo mv /etc/mpd.conf /etc/mpd.bak

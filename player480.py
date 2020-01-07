@@ -3,7 +3,7 @@
 # This is to be used with a 3.5" HDMI touchscreen or equivalent
 # Tested with the Raspberry pi 2 and raspbian stretch
 # The program must be run within the Lxterminal
-# Rev2.2 
+# Rev2.3 
 import sys, pygame
 from pygame.locals import *
 import time
@@ -12,6 +12,7 @@ import subprocess
 import os
 import glob
 import random
+import requests # check internet connection
 
 pygame.init()
 
@@ -39,6 +40,7 @@ shuffle = False
 #global album_img
 _image = ('/tmp/kunst.png')
 album_img = ('150x112.png')
+connection = None
 
 
 #define function that checks for mouse location
@@ -150,18 +152,37 @@ def button(number):
 		mp3 = True
                 refresh_menu_screen()
 
+def internet():
+    """Detect an internet connection."""
+    global connection
+    connection = None
+    try:
+        r = requests.get("https://google.com")
+        r.raise_for_status()
+        print("Internet connection detected.")
+        connection = True
+    except:
+        print("Internet connection not detected.")
+        connection = False
+    finally:
+        return connection
+
 
 def refresh_menu_screen():
+        global connect_img
 #set up the fixed items on the menu
-	cpu = os.popen("vcgencmd measure_temp").readline()
-	cpu = cpu[-7:] #remove characters not needed
-	cpu = cpu[:-1]
+	#cpu = os.popen("vcgencmd measure_temp").readline()
+	#cpu = cpu[-7:] #remove characters not needed
+	#cpu = cpu[:-1]
         current_time = datetime.datetime.now().strftime('%I:%M')
         time_font=pygame.font.Font(None,70)
-        time_label = time_font.render(current_time, 1, (silver))
-	cpu_font=pygame.font.Font(None,32) 
-	cpu_label = cpu_font.render(cpu, 1, (silver)) 
-	font=pygame.font.Font(None,32)
+        time_label = time_font.render(current_time, 1, (white))
+	#cpu_font=pygame.font.Font(None,32) 
+	#cpu_label = cpu_font.render(cpu, 1, (silver)) 
+#        global connection
+	connect_font=pygame.font.Font(None, 32)
+        connect_label = connect_font.render(". .", 1, (white))
+        font=pygame.font.Font(None,32)
 	station_font=pygame.font.Font(None,28)
         skin=pygame.image.load("skin480.png")
 	indicator_on=font.render("[        ]", 1, (blue))
@@ -170,17 +191,25 @@ def refresh_menu_screen():
 
 	#draw the main elements on the screen 
         screen.blit(skin,(0,0))
-        screen.blit(cpu_label,(398, 62)) #cputemp
+        #screen.blit(cpu_label,(398, 62)) #cputemp
+ #       screen.blit(connect_label,(398, 62)) 
         screen.blit(label2,(190, 62))
 	pygame.draw.rect(screen, black, (336, 95, 130, 49),0)
 	pygame.draw.rect(screen, black, (52, 188, 407, 71),0)
         screen.blit(time_label,(336, 90))
+        conn_image=pygame.image.load("internet.png")
+        if connection==True:
+            screen.blit(conn_image,(418, 62))
+        else:
+            screen.blit(connect_label,(418, 62))
+
 	try:
 	    album_art=pygame.image.load(album_img) # album art
             album_art=pygame.transform.scale(album_art, (155, 117))
 	    screen.blit(album_art,(17,60))
 	except pygame.error:
-	    refresh_menu_screen()
+            time.sleep(1)
+	    #refresh_menu_screen()
 	##### display the station name and split it into 2 parts : 
 	lines = subprocess.check_output("mpc current", shell=True).split("-")
 	if len(lines)==1:
@@ -251,20 +280,22 @@ def refresh_menu_screen():
 def main():
     global click_pos
     while 1:
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                click_pos = pygame.mouse.get_pos()
-                print "screen pressed" #for debugging purposes
-                print click_pos #for checking
-                on_click()
+        internet()
+        print(connection)
+        for x in range(40): # loop for a while then check internet.
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    click_pos = pygame.mouse.get_pos()
+                    print "screen pressed" #for debugging purposes
+                    print click_pos #for checking
+                    on_click()
 
             #ensure there is always a safe way to end the 
-            #program if the touch screen fails
 
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE: # ESC key will kill it
-                    sys.exit()
-	refresh_menu_screen()
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE: # ESC key will kill it
+                        sys.exit()
+            refresh_menu_screen()
     time.sleep(0.2)
 
 #################### EVERTHING HAS NOW BEEN DEFINED ###########################
