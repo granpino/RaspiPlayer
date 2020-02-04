@@ -4,7 +4,7 @@
 clear
 #create playlists
 echo "Before running this file, make sure mpd, mpc, Kunst"
-echo "ffmjpeg, and jq are installed"
+echo "and ffmpeg are installed"
 echo "====================="
 
 echo ""
@@ -20,15 +20,11 @@ sudo mkdir /mnt/usbdrive
 echo "Generating Playlists:"
 echo "======================"
 echo ""
-sudo touch /var/lib/mpd/playlists/playlist.m3u
-#sudo touch /var/lib/mpd/playlists/mp3.m3u
-
-#sudo mv *.mp3 /mnt/usbdrive
-#sudo ls -1 /mnt/usbdrive/*.mp3 > /var/lib/mpd/playlists/mp3.m3u
+sudo touch /var/lib/mpd/playlists/Radio.m3u
 
 #build sample internet radio playlist
 
-cat <<EOF > /var/lib/mpd/playlists/playlist.m3u
+cat <<EOF > /var/lib/mpd/playlists/Radio.m3u
 
 http://airspectrum.cdnstream1.com:8018/1606_192
 http://uk3.internet-radio.com:8198/
@@ -79,18 +75,18 @@ sudo cp kunst-run.sh /etc/init.d/
 sudo chmod +x /etc/init.d/kunst-run.sh
 sudo update-rc.d kunst-run.sh defaults
 
-echo "Create backup of mpd.conf:"
+echo "Make backup of mpd.conf and create new:"
 echo "======================"
 echo ""
 sudo mv /etc/mpd.conf /etc/mpd.bak
 cat <<EOF > /etc/mpd.conf
-#created by:
+# created by RaspiPlayer
 # An example configuration file for MPD.
 # Files and directories #######################################################
 #
 music_directory		"/mnt/usbdrive"
 playlist_directory	"/var/lib/mpd/playlists"
-db_file			"/var/lib/mpd/tag_cache"
+db_file			"/var/lib/mpd/database"
 log_file		"/var/log/mpd/mpd.log"
 pid_file		"/run/mpd/pid"
 state_file		"/var/lib/mpd/state"
@@ -108,7 +104,7 @@ audio_output {
 	name		"My ALSA Device"
 }
 #
-# An example of an OSS output, add your own MAC address
+# 
 audio_output {
        type            "alsa"
        name            "bluetooth-speaker "
