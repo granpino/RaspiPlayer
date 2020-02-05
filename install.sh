@@ -85,7 +85,7 @@ cat <<EOF > /etc/mpd.conf
 # Files and directories #######################################################
 #
 music_directory		"/mnt/usbdrive"
-playlist_directory	"/var/lib/mpd/playlists"
+playlist_directory	"/var/lib/mpd/Radio"
 db_file			"/var/lib/mpd/database"
 log_file		"/var/log/mpd/mpd.log"
 pid_file		"/run/mpd/pid"
