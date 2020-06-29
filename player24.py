@@ -5,7 +5,7 @@
 # The program must be run within the Lxterminal.
 # Current changes include: Selection of folders to be played, or Play everything
 # in the USB drive by clicking on Mp3 button.
-# Rev2.4 by Granpino
+# Rev2.41 by Granpino
 
  
 import sys, pygame
@@ -16,8 +16,8 @@ import subprocess
 import os
 import glob
 import random
-import requests # check internet connection
-
+#import requests # check internet connection
+import socket
 pygame.init()
 
 #define colors
@@ -38,6 +38,7 @@ subprocess.call("mpc volume 65", shell=True)
 subprocess.call("mpc update ", shell=True)
 subprocess.call("mpc load Radio", shell=True)
 
+clock = pygame.time.Clock()
 
 mp3 = False
 shuffle = False
@@ -192,23 +193,25 @@ def button(number):
 		CurrPlaylist = "USB"
                 refresh_menu_screen()
 
-def internet():
+def connected():
     """Detect an internet connection."""
     global connection
     connection = None
     try:
-        r = requests.get("https://google.com") # check every 25 seconds
-        r.raise_for_status()
-#        print("Internet connection detected.")
+        socket.create_connection(("1.1.1.1", 53)) # check every 180 seconds
+      #  r.raise_for_status()
+        print("Internet connection detected.")
+#	return True
         connection = True
-    except:
-#        print("Internet connection not detected.")
+    except OSError:
+        print("Internet connection not detected.")
         connection = False
     finally:
         return connection
 
 
 def refresh_menu_screen():
+	global connection
         global connect_img
 	global CurrPlaylist
         current_time = datetime.datetime.now().strftime('%I:%M')
@@ -221,7 +224,7 @@ def refresh_menu_screen():
 	station_font=pygame.font.Font(None,28)
         skin1=pygame.image.load("backgnd.png")
         skin2=pygame.image.load("buttons.png")
-	indicator_on=font.render("[        ]", 1, (blue))
+	indicator_on=font.render("[        ]", 1, (green))
         indicator_off=font.render("", 1, (white))
 	label2=font.render("RaspiPlayer", 1, (silver))
 
@@ -261,9 +264,10 @@ def refresh_menu_screen():
 	if line1 =="":
 		line2 = "Press PLAY"
 		Playlist_name = (CurrPlaylist)
-
+#		connection = False
 	else:
 		Playlist_name = (CurrPlaylist)
+#		connection = True
 
 	station_name=station_font.render(line1, 1, (white))
 	additional_data=station_font.render(line2, 1, (white))
@@ -305,30 +309,34 @@ def refresh_menu_screen():
 	else:
 		screen.blit(indicator_off,(298, 16))
 		screen.blit(indicator_on,(209,16))
-	time.sleep(.3)
+#	time.sleep(.3)
 	pygame.display.flip()
 
 def main():
     global click_pos
+    timer = pygame.time.get_ticks()
     while 1:
-        internet()
-#        print(connection)
-        for x in range(50): # loop for a while then check internet.
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    click_pos = pygame.mouse.get_pos()
-                    print "screen pressed" #for debugging purposes
-                    print click_pos #for checking coordinates
-                    on_click()
+        seconds=(pygame.time.get_ticks() - timer)/1000
+        if seconds > 180: # check every 3 min 
+	    timer = pygame.time.get_ticks()
+            connected() # check for internet connection
+
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                click_pos = pygame.mouse.get_pos()
+                print "screen pressed" #for debugging purposes
+                print click_pos #for checking coordinates
+                on_click()
 
             #Press ESC key on the computer to end while in VNC
 
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE: # ESC key will kill it
-                        sys.exit()
-            refresh_menu_screen()
-    time.sleep(0.2)
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE: # ESC key will kill it
+                    sys.exit()
+        clock.tick(15) #refresh screen 15fps 
+        refresh_menu_screen()
 
+connected()
 refresh_menu_screen() 
 main() # Main loop
 
