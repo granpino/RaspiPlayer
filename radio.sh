@@ -1,7 +1,7 @@
 #!/bin/bash
 #radio.sh
 
-sudo python player24.py
+sudo python player25.py
 
 
 
