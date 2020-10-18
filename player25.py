@@ -6,7 +6,7 @@
 # The program must be run within the Lxterminal.
 # 
 # 
-# Rev2.5 by Granpino
+# Rev2.51 by Granpino
  
 import sys, pygame
 from pygame.locals import *
@@ -284,6 +284,7 @@ def button(number):
 
 def connected():
     #Detect an internet connection
+    return # this no longer works
     global connection
     connection = None
     try:
@@ -383,8 +384,8 @@ def refresh_screen():
 
 	if connection==True:
 		screen.blit(conn_image,(int(397*q), int(62*q)))
-	else:
-		screen.blit(connect_label,(int(397*q), int(62*q)))
+	#else:
+	#	screen.blit(connect_label,(int(397*q), int(62*q))) # detection no longer works.
 
 	try:
 		album_art=pygame.image.load(album_img) # album art
