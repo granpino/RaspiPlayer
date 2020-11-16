@@ -6,7 +6,7 @@
 # The program must be run within the Lxterminal.
 # 
 # 
-# Rev2.51 by Granpino
+# Rev2.52 by Granpino
  
 import sys, pygame
 from pygame.locals import *
@@ -42,7 +42,7 @@ volume = volume[-4:-1] # remove unwanted characters.
 clock = pygame.time.Clock()
 
 # make sure to change the settings at /boot/config.txt for the
-# resolution required. Do this after installing the screen driver.
+# resolution required. Do this after installing the touch screen driver.
 q = 1.33 # screen size ratio. Use 1 for 480x320,or 1.333 for 640x430.
 
 mp3 = False
@@ -444,7 +444,7 @@ def main():
 			if event.type == KEYDOWN:
 				if event.key == K_ESCAPE: # ESC key will kill it
 					sys.exit()
-		clock.tick(10) #refresh screen 8fps 
+		clock.tick(3) #refresh screen fps 
 		refresh_screen()
 	pygame.quit()
 
