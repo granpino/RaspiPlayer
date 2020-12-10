@@ -6,7 +6,7 @@
 # The program must be run within the Lxterminal.
 # 
 # 
-# Rev2.52 by Granpino
+# Rev2.53 by Granpino, Dec2020
  
 import sys, pygame
 from pygame.locals import *
@@ -43,7 +43,8 @@ clock = pygame.time.Clock()
 
 # make sure to change the settings at /boot/config.txt for the
 # resolution required. Do this after installing the touch screen driver.
-q = 1.33 # screen size ratio. Use 1 for 480x320,or 1.333 for 640x430.
+# also change the background image with the correct size.
+q = 1.33 # screen size ratio. Use 1 for 480x320, or 1.33 for 640x430.
 
 mp3 = False
 shuffle = False
@@ -58,15 +59,15 @@ _image = ('/tmp/kunst.png')
 album_img = ('150x112.png')
 conn_image=pygame.image.load("internet.png")
 genlist_img=pygame.image.load("genlist2.png")
-skin1=pygame.image.load("640x430.png")
-skin2=pygame.image.load("buttons.png")
+skin1=pygame.image.load("640x430.png") #change as required
+skin2=pygame.image.load("buttons.png") #change as required
 
 connection = None
 
 #set size of the screen
-size = width, height = 640, 430
-### change screen mode for troubleshooting purposes
-#screen = pygame.display.set_mode(size) #,pygame.FULLSCREEN)
+size = width, height = 640, 430 #change as required
+### remove FULLSCREEN mode for troubleshooting purposes
+#screen = pygame.display.set_mode(size)
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 
 #define function that checks for mouse location
@@ -202,18 +203,14 @@ def button(number):
 			mp3 = True
 			play = False
 			CurrPlaylist = "USB"
-			#refresh_screen()
-
+			
 	if number == 4:
 		if play == True:
 			subprocess.call("mpc prev ", shell=True)
-	#	refresh_screen()
-
+	
 	if number == 5:
 		if play == True:
 			subprocess.call("mpc next ", shell=True)
-			#play = True
-	#	refresh_screen()
 
 	if number == 6:
 		subprocess.call("mpc volume -5 ", shell=True)
@@ -230,7 +227,6 @@ def button(number):
 	if number == 8:  # Radio
 		subprocess.call("mpc clear ", shell=True)
 		subprocess.call("mpc load Radio ", shell=True)
-		#global mp3
 		mp3 = False
 		CurrPlaylist = "Radio"
 		play = False
@@ -242,7 +238,7 @@ def button(number):
 		shuffle = (1,0)[shuffle]
 	#	refresh_screen()
 
-	if number == 10: # Scan USB
+	if number == 10: # Scan USB for music
 		font = pygame.font.SysFont('sans', 20, bold=0)
 		Label1=font.render("Scanning USB for Mp3 files...", 1, (black))
 		Label2=font.render("Generate USB playlists.", 1, (black))
@@ -269,7 +265,7 @@ def button(number):
 						return
 				if event.type == KEYDOWN:
 					if event.key == K_ESCAPE: # ESC to exit
-						sys.exit()
+						return
 
 			pygame.display.flip()
 		time.sleep(1)
@@ -277,14 +273,15 @@ def button(number):
 
 	if number == 11:
 		if mp3 == True:
-			atseek = (seek-70)*100 / 540 #Formula: (x-inMin)(outMax-outMin) / (inMax-inMin)+outMin
+		# bargraph start point = 52, bargraph lenght = 407
+			atseek = (seek-52*q)*100 / (407*q) 
 			subprocess.call("mpc seek " + str(atseek) + "%", shell=True)
 		else:
 			return
 
 def connected():
     #Detect an internet connection
-    return # this no longer works
+    return # this is not reliable
     global connection
     connection = None
     try:
@@ -332,12 +329,12 @@ def show_current():
 def Rem_time():
     pygame.draw.line(screen, black, (52*q, 260*q), (459*q, 260*q), 10)
 
-     ## display remaining time
+     ## display remaining time in %
     try: 
 	    RemTime = subprocess.check_output("mpc -f  %time%", shell=True).split("\n")
     except subprocess.CalledProcessError:
         return
-    if len(RemTime)==0:
+    if len(RemTime)==0: # percent time played
         remT1 = RemTime[0]
         remT1 = remT1[:-1]
 
@@ -350,7 +347,9 @@ def Rem_time():
             str1 = remT2[-5:-2]
             str1 = str1.replace("(", '')
             str1 = int(str1)
-            pygame.draw.line(screen, green, (52*q, 260*q), (52*q + (str1*5.4), 260*q), 8)
+            # Multiplier =  (407/100)*q or (bargraph length / 100%)
+            # multiply by 5.4 for 640x430 and 4.07 for 480x320
+            pygame.draw.line(screen, green, (52*q, 260*q), (52*q + (str1*4.07*q), 260*q), 8)
         except ValueError:
             subprocess.call("mpc stop", shell=True)
             print('value error')
@@ -385,7 +384,7 @@ def refresh_screen():
 	if connection==True:
 		screen.blit(conn_image,(int(397*q), int(62*q)))
 	#else:
-	#	screen.blit(connect_label,(int(397*q), int(62*q))) # detection no longer works.
+	#	screen.blit(connect_label,(int(397*q), int(62*q))) # --------detection not reliable.
 
 	try:
 		album_art=pygame.image.load(album_img) # album art
@@ -437,14 +436,14 @@ def main():
 			if event.type == MOUSEBUTTONDOWN:
 				click_pos = event.pos
 			#	print (event)
-			#	print (event.pos)
+				print (event.pos)
 				seek = event.pos[0] # click position x
 				on_click()
 
 			if event.type == KEYDOWN:
 				if event.key == K_ESCAPE: # ESC key will kill it
 					sys.exit()
-		clock.tick(3) #refresh screen fps 
+		clock.tick(5) #refresh screen fps 
 		refresh_screen()
 	pygame.quit()
 
